@@ -13,22 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tapadyuti;
+package com.tapadyuti.bengalicalendar;
 
 /**
- * Minimal entry point used when running the project as an application rather than as a library.
+ * Output and parsing locales used by the library.
  */
-public class Main {
-    /**
-     * Prints a simple greeting.
-     *
-     * @param args command-line arguments
-     */
-    public static void main(String[] args) {
-        System.out.printf("Hello and welcome!");
-
-        for (int i = 1; i <= 5; i++) {
-            System.out.println("i = " + i);
-        }
-    }
+public enum BengaliLocale {
+    /** English transliterations and Western digits. */
+    ENGLISH,
+    /** Bengali-script month names, season names, and Bengali numerals. */
+    BENGALI
 }

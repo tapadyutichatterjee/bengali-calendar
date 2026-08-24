@@ -13,22 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tapadyuti;
-
 /**
- * Minimal entry point used when running the project as an application rather than as a library.
+ * Internal conversion and astronomical support classes.
  */
-public class Main {
-    /**
-     * Prints a simple greeting.
-     *
-     * @param args command-line arguments
-     */
-    public static void main(String[] args) {
-        System.out.printf("Hello and welcome!");
-
-        for (int i = 1; i <= 5; i++) {
-            System.out.println("i = " + i);
-        }
-    }
-}
+package com.tapadyuti.bengalicalendar.internal;

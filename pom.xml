@@ -6,12 +6,164 @@
 
     <groupId>com.tapadyuti</groupId>
     <artifactId>bengali-calendar</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
 
+    <name>bengali-calendar</name>
+    <description>
+        Bengali (Bangla) calendar library for Java 21. Converts between Gregorian and Bengali dates,
+        supports the Bangladesh Revised and West Bengal Traditional calendar systems, provides rich
+        formatting in English and Bengali script with Bengali numeral output, integrates with
+        java.time.chrono (ChronoLocalDate / Chronology), and includes cultural data for seasons,
+        weekdays, and holidays.
+    </description>
+    <url>https://github.com/tapadyutichatterjee/bengali-calendar</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <!-- Confirmed from git config -->
+            <name>Tapadyuti Chatterjee</name>
+            <url>https://github.com/tapadyutichatterjee</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/tapadyutichatterjee/bengali-calendar.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/tapadyutichatterjee/bengali-calendar.git</developerConnection>
+        <url>https://github.com/tapadyutichatterjee/bengali-calendar</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <!-- Existing compiler and encoding configuration preserved unchanged -->
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.12.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Always runs during mvn test / mvn verify — no release profile needed -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!--
+            Release profile: activated explicitly with -Prelease.
+            Contains signing, source/javadoc JARs, and Central publisher.
+            Normal builds (mvn test, mvn verify) do NOT require Central credentials or a GPG key.
+        -->
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.3.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.11.2</version>
+                        <configuration>
+                            <!--
+                                Explicit release=21 ensures Javadoc uses the correct API set.
+                                detectJavaApiLink=false avoids cross-release link resolution failures
+                                and is safe here because all public API is within this module.
+                                When module-info.java is added (todo: package-info), this
+                                configuration remains compatible with JPMS modules.
+                            -->
+                            <release>21</release>
+                            <detectJavaApiLink>false</detectJavaApiLink>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.8</version>
+                        <configuration>
+                            <!--
+                                pinentry-mode loopback: required for non-interactive signing.
+                                In CI, the passphrase is supplied via the MAVEN_GPG_PASSPHRASE
+                                environment variable (supported natively by maven-gpg-plugin 3.x).
+                                Locally, the GPG agent handles the passphrase interactively.
+                            -->
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!--
+                        Sonatype Central Publisher Portal plugin (modern workflow).
+                        autoPublish is intentionally absent: deploy uploads and validates the
+                        bundle; final release is completed manually via central.sonatype.com.
+                        publishingServerId=central matches the <server><id>central</id></server>
+                        already present in ~/.m2/settings.xml.
+                    -->
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.11.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

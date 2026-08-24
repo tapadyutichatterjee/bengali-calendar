@@ -1,0 +1,80 @@
+name: Publish to Maven Central
+
+# Triggers: published GitHub release, or explicit manual dispatch.
+# Never runs on ordinary branch pushes or pull requests.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+# Least-privilege: read-only repository access is sufficient.
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Build · Test · Sign · Upload
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository (full history + tags)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java 21 with Maven dependency cache
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # Import the GPG private key from secrets into the runner's keyring.
+      # The key is read from the environment variable, never echoed directly.
+      - name: Import GPG private key
+        run: echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+
+      # Create a temporary Maven settings file that supplies Central credentials
+      # via environment variables resolved at mvn runtime (${env.VAR} syntax).
+      # This file is never committed to the repository.
+      # GPG passphrase is supplied separately via MAVEN_GPG_PASSPHRASE (see deploy step).
+      - name: Create CI Maven settings
+        run: |
+          mkdir -p "${HOME}/.m2"
+          cat > "${HOME}/.m2/settings.xml" << 'SETTINGS'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                        https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <!-- Must match publishingServerId in pom.xml -->
+                <id>central</id>
+                <username>${env.CENTRAL_TOKEN_USERNAME}</username>
+                <password>${env.CENTRAL_TOKEN_PASSWORD}</password>
+              </server>
+            </servers>
+          </settings>
+          SETTINGS
+
+      # Run the full test suite before any deployment step.
+      # Fails immediately if any test fails, preventing a broken release.
+      - name: Run full test suite
+        run: mvn --batch-mode verify
+
+      # Package, sign, and upload to the Central Publisher Portal.
+      # -DskipTests: tests already ran in the previous step.
+      # -Dgpg.useagent=false: disables the GPG agent for non-interactive CI signing.
+      # MAVEN_GPG_PASSPHRASE: read natively by maven-gpg-plugin 3.x; never appears on the command line.
+      # CENTRAL_TOKEN_USERNAME / CENTRAL_TOKEN_PASSWORD: resolved by Maven from ${env.*} in settings.xml.
+      # autoPublish is not set in the POM: the bundle is uploaded and validated but NOT
+      # automatically released. Final publication requires manual approval at central.sonatype.com.
+      - name: Deploy to Maven Central (manual publish)
+        run: mvn --batch-mode -Prelease -DskipTests -Dgpg.useagent=false deploy
+        env:
+          CENTRAL_TOKEN_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
+          CENTRAL_TOKEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
