@@ -1,5 +1,12 @@
 # Bengali Calendar (Java 21)
 
+[![Build](https://github.com/tapadyutichatterjee/bengali-calendar/actions/workflows/ci.yml/badge.svg?branch=master&event=push)](https://github.com/tapadyutichatterjee/bengali-calendar/actions/workflows/ci.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/com.tapadyuti/bengali-calendar?label=Maven%20Central)](https://central.sonatype.com/artifact/com.tapadyuti/bengali-calendar)
+[![Javadocs](https://javadoc.io/badge2/com.tapadyuti/bengali-calendar/javadoc.svg)](https://javadoc.io/doc/com.tapadyuti/bengali-calendar)
+[![Java 21](https://img.shields.io/badge/Java-21-007396?logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
+[![License](https://img.shields.io/github/license/tapadyutichatterjee/bengali-calendar)](https://github.com/tapadyutichatterjee/bengali-calendar/blob/master/LICENSE)
+[![Publish](https://github.com/tapadyutichatterjee/bengali-calendar/actions/workflows/publish.yml/badge.svg)](https://github.com/tapadyutichatterjee/bengali-calendar/actions/workflows/publish.yml)
+
 A Java library for converting between Gregorian and Bengali (Bangla) dates with support for:
 
 - `BANGLADESH_REVISED` calendar
