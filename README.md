@@ -207,8 +207,14 @@ import java.time.chrono.Chronology;
 
 Chronology chronology = BengaliChronology.INSTANCE;
 // Also resolvable by id in environments where service loading is enabled:
-Chronology byId = Chronology.of("bengali");
+Chronology byId = Chronology.of("Bengali");
 ```
+
+Chronology discovery identifiers:
+
+- Chronology ID: `Bengali`
+- Calendar type: `bengali`
+- Lookup: `Chronology.of("Bengali")`
 
 ## Build and test
 
@@ -236,4 +242,3 @@ mvn -Prelease deploy
 ```
 
 - final publication is completed in the Sonatype Central Portal UI (manual publish flow).
-

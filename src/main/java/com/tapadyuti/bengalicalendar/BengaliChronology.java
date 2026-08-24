@@ -33,25 +33,25 @@ import java.util.Map;
 /**
  * {@link Chronology} implementation for Bengali calendar dates.
  * <p>
- * This singleton bridges {@link BengaliDate} with the {@code java.time.chrono} SPI so that callers can resolve the
+ * This class bridges {@link BengaliDate} with the {@code java.time.chrono} SPI so that callers can resolve the
  * chronology by id, create chronology-aware dates, and work with chronology-specific periods.
  * </p>
  */
 public final class BengaliChronology extends AbstractChronology {
-    /** Shared singleton instance. */
+    /** Recommended shared instance. */
     public static final BengaliChronology INSTANCE = new BengaliChronology();
 
-    private BengaliChronology() {
+    public BengaliChronology() {
     }
 
     /**
      * Returns the chronology identifier.
      *
-     * @return {@code "bengali"}
+     * @return {@code "Bengali"}
      */
     @Override
     public String getId() {
-        return "bengali";
+        return "Bengali";
     }
 
     /**
@@ -261,7 +261,7 @@ public final class BengaliChronology extends AbstractChronology {
     }
 
     /**
-     * Returns the hash code for this singleton chronology.
+     * Returns the hash code for this chronology type.
      *
      * @return the hash code
      */

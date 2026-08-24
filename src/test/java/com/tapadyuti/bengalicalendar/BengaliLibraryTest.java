@@ -9,6 +9,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.Year;
+import java.time.chrono.Chronology;
 import java.time.chrono.ChronoPeriod;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
@@ -46,6 +47,15 @@ class BengaliLibraryTest {
         assertEquals(BengaliCalendarSystem.WEST_BENGAL_TRADITIONAL, BengaliCalendar.getDefault());
         BengaliDate date = BengaliCalendar.from(LocalDate.of(2024, 4, 14));
         assertEquals(BengaliCalendarSystem.WEST_BENGAL_TRADITIONAL, date.getCalendarSystem());
+    }
+
+    @Test
+    void discoversBengaliChronologyThroughJavaTimeSpi() {
+        Chronology chronology = Chronology.of("Bengali");
+
+        assertInstanceOf(BengaliChronology.class, chronology);
+        assertEquals("Bengali", chronology.getId());
+        assertEquals("bengali", chronology.getCalendarType());
     }
 
     @Test
