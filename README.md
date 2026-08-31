@@ -1,21 +1,48 @@
-# Bengali Calendar (Java 21)
+# Bengali Calendar
 
 [![Build](https://github.com/tapadyutichatterjee/bengali-calendar/actions/workflows/ci.yml/badge.svg?branch=master&event=push)](https://github.com/tapadyutichatterjee/bengali-calendar/actions/workflows/ci.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/com.tapadyuti/bengali-calendar?label=Maven%20Central)](https://central.sonatype.com/artifact/com.tapadyuti/bengali-calendar)
 [![Javadocs](https://javadoc.io/badge2/com.tapadyuti/bengali-calendar/javadoc.svg)](https://javadoc.io/doc/com.tapadyuti/bengali-calendar)
 [![Java 21](https://img.shields.io/badge/Java-21-007396?logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
 [![License](https://img.shields.io/github/license/tapadyutichatterjee/bengali-calendar)](https://github.com/tapadyutichatterjee/bengali-calendar/blob/master/LICENSE)
-[![Publish](https://github.com/tapadyutichatterjee/bengali-calendar/actions/workflows/publish.yml/badge.svg)](https://github.com/tapadyutichatterjee/bengali-calendar/actions/workflows/publish.yml)
 
-A Java library for converting between Gregorian and Bengali (Bangla) dates with support for:
+A Java 21 library for converting between Gregorian and Bengali (Bangla) dates. It supports both
+the Bangladesh Revised and West Bengal Traditional calendar systems while fitting naturally into
+Java's modern date and time APIs.
 
-- `BANGLADESH_REVISED` calendar
-- `WEST_BENGAL_TRADITIONAL` calendar
-- formatting and parsing
-- Bengali/English locale output
-- `java.time` chronology integration
+## Contents
+
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Calendar systems and defaults](#calendar-systems-and-defaults)
+- [Quick start](#quick-start)
+- [Usage guide](#usage-guide)
+- [Documentation](#documentation)
+- [Calendar accuracy and scope](#calendar-accuracy-and-scope)
+- [Build from source](#build-from-source)
+- [Contributing](#contributing)
+- [Support](#support)
+- [License](#license)
+
+## Features
+
+- Bidirectional conversion between Gregorian and Bengali dates
+- Bangladesh Revised and West Bengal Traditional calendar systems
+- Formatting and parsing in English and Bengali script, including Bengali numerals
+- Date arithmetic, inclusive date ranges, year-month helpers, weekdays, seasons, and selected holidays
+- `java.time.chrono` integration through `BengaliChronology` and `ChronoLocalDate`
+- Java Platform Module System support through `com.tapadyuti.bengalicalendar`
+- No runtime dependencies outside the Java standard library
+
+## Requirements
+
+- JDK 21 or newer
+- Maven, Gradle, or another build tool that can resolve dependencies from Maven Central
 
 ## Installation
+
+### Maven
 
 ```xml
 <dependency>
@@ -25,13 +52,29 @@ A Java library for converting between Gregorian and Bengali (Bangla) dates with 
 </dependency>
 ```
 
-## Default behavior
+### Gradle (Kotlin DSL)
+
+```kotlin
+dependencies {
+    implementation("com.tapadyuti:bengali-calendar:1.0.0")
+}
+```
+
+The current release and all published versions are available on
+[Maven Central](https://central.sonatype.com/artifact/com.tapadyuti/bengali-calendar).
+
+## Calendar systems and defaults
+
+| Calendar system | Behavior |
+|---|---|
+| `BANGLADESH_REVISED` | Modern arithmetic calendar used in Bangladesh, with a fixed Bengali New Year on 14 April and a leap-year adjustment for Falgun |
+| `WEST_BENGAL_TRADITIONAL` | Traditional calendar based on Sankranti boundaries derived from the library's astronomical calculation |
 
 By default, no-arg/system-omitting APIs use:
 
 `BengaliCalendarSystem.WEST_BENGAL_TRADITIONAL`
 
-That means these use WEST Bengal by default:
+That means these use the West Bengal Traditional system by default:
 
 ```java
 BengaliCalendar.today();
@@ -40,13 +83,16 @@ BengaliDate.of(1431, BengaliMonth.BAISHAKH, 1);
 BengaliDateFormatter.parse("01-01-1431", "dd-MM-yyyy");
 ```
 
-### Override default globally
+### Change the process-wide default
 
 ```java
 BengaliCalendar.setDefault(BengaliCalendarSystem.BANGLADESH_REVISED);
 ```
 
-### Override default with JVM property
+The default is stored process-wide. Applications that work with more than one Bengali calendar
+system should prefer the overloads that accept a `BengaliCalendarSystem` explicitly.
+
+### Configure the default with a JVM property
 
 ```bash
 java -Dbengalicalendar.default.system=BANGLADESH_REVISED ...
@@ -57,7 +103,7 @@ Accepted property values:
 - `BANGLADESH_REVISED` or `BD`
 - `WEST_BENGAL_TRADITIONAL` or `WB`
 
-### Explicit system always wins
+### Select a system per operation
 
 ```java
 BengaliDate bdDate = BengaliCalendar.from(
@@ -86,19 +132,21 @@ public class Example {
 }
 ```
 
-## Conversion examples
+## Usage guide
 
-### Bangladesh Revised conversion
+### Conversion examples
+
+#### Bangladesh Revised conversion
 
 ```java
 BengaliDate bd = BengaliCalendar.from(
     LocalDate.of(2024, 4, 14),
     BengaliCalendarSystem.BANGLADESH_REVISED
 );
-// 1431-BAISHAKH-1 (BD system)
+// Bengali year 1431, Baishakh 1
 ```
 
-### West Bengal Traditional conversion
+#### West Bengal Traditional conversion
 
 ```java
 BengaliDate wb = BengaliCalendar.from(
@@ -107,9 +155,9 @@ BengaliDate wb = BengaliCalendar.from(
 );
 ```
 
-## Formatting and parsing
+### Formatting and parsing
 
-### Supported pattern tokens
+#### Supported pattern tokens
 
 | Token | Meaning |
 |---|---|
@@ -123,7 +171,7 @@ BengaliDate wb = BengaliCalendar.from(
 | `yyyy` | Year (4-digit) |
 | `E` | Calendar system (`BD` / `WB`) |
 
-### Format in English
+#### Format in English
 
 ```java
 BengaliDate date = BengaliDate.of(1431, BengaliMonth.BAISHAKH, 1);
@@ -131,14 +179,14 @@ String text = date.format("dd MMMM yyyy E", BengaliLocale.ENGLISH);
 // 01 Baishakh 1431 WB
 ```
 
-### Format in Bengali script
+#### Format in Bengali script
 
 ```java
 String textBn = date.format("dd MMMM yyyy E", BengaliLocale.BENGALI);
 // ০১ বৈশাখ ১৪৩১ WB
 ```
 
-### Parse text
+#### Parse text
 
 ```java
 BengaliDate parsed = BengaliDateFormatter.parse(
@@ -149,7 +197,7 @@ BengaliDate parsed = BengaliDateFormatter.parse(
 );
 ```
 
-### Parse Bengali numerals
+#### Parse Bengali numerals
 
 ```java
 BengaliDate parsedBn = BengaliDateFormatter.parse(
@@ -160,7 +208,7 @@ BengaliDate parsedBn = BengaliDateFormatter.parse(
 );
 ```
 
-## Date arithmetic
+### Date arithmetic
 
 ```java
 BengaliDate date = BengaliDate.of(1431, BengaliMonth.BAISHAKH, 1);
@@ -172,7 +220,7 @@ BengaliDate plus1Year  = date.plusYears(1);
 BengaliDate minus5Days = date.minusDays(5);
 ```
 
-## Year-month helper
+### Year-month helper
 
 ```java
 BengaliYearMonth ym = BengaliYearMonth.of(1431, BengaliMonth.BAISHAKH);
@@ -180,7 +228,7 @@ int length = ym.lengthOfMonth();
 BengaliDate day12 = ym.atDay(12);
 ```
 
-## Date range helper
+### Date range helper
 
 ```java
 BengaliDate start = BengaliDate.of(1431, BengaliMonth.BAISHAKH, 1);
@@ -192,7 +240,7 @@ long days = range.lengthInDays();          // inclusive count
 long streamCount = range.stream().count(); // 7
 ```
 
-## Holidays
+### Holidays
 
 ```java
 BengaliDate d = BengaliDate.of(1431, BengaliMonth.BAISHAKH, 1);
@@ -207,7 +255,7 @@ Map<BengaliDate, BengaliHoliday> holidays =
     BengaliHoliday.forYear(1431, BengaliCalendarSystem.BANGLADESH_REVISED);
 ```
 
-## `java.time` chronology integration
+### `java.time` chronology integration
 
 ```java
 import java.time.chrono.Chronology;
@@ -223,29 +271,57 @@ Chronology discovery identifiers:
 - Calendar type: `bengali`
 - Lookup: `Chronology.of("Bengali")`
 
-## Build and test
+## Documentation
+
+- [API documentation](https://javadoc.io/doc/com.tapadyuti/bengali-calendar)
+- [Maven Central artifact](https://central.sonatype.com/artifact/com.tapadyuti/bengali-calendar)
+- [Releases](https://github.com/tapadyutichatterjee/bengali-calendar/releases)
+- [Source repository](https://github.com/tapadyutichatterjee/bengali-calendar)
+
+## Calendar accuracy and scope
+
+- Bangladesh Revised conversions use the deterministic modern calendar rules implemented by the library.
+- West Bengal Traditional conversions use calculated Sankranti boundaries. Panjika traditions and
+  authoritative almanacs can differ, particularly for historical, future, religious, or ceremonial dates.
+- The bundled holiday data is intentionally selective and is not a statutory or exhaustive regional
+  holiday calendar.
+
+For culturally or legally significant use cases, validate results against an appropriate authoritative source.
+
+## Build from source
+
+Clone the repository, make sure JDK 21 and Maven are available, and run:
 
 ```bash
-export PATH=/opt/homebrew/bin:$PATH
-cd /path/to/bengali-calendar
-mvn test
 mvn verify
 ```
 
-## Release build (no publish)
+To generate the release artifacts locally without publishing them:
 
 ```bash
 mvn -Prelease verify
 ```
 
-## Maven Central publishing
+## Contributing
 
-Publishing is configured for Sonatype Central Publisher Portal.
+Contributions are welcome. Before opening a pull request:
 
-- local release/deploy command:
+1. Search the [existing issues](https://github.com/tapadyutichatterjee/bengali-calendar/issues)
+   and open one for substantial changes.
+2. Fork the repository and create a focused branch.
+3. Add or update tests for behavioral changes.
+4. Run `mvn verify`.
+5. Open a pull request that explains the problem, the approach, and any calendar system affected.
 
-```bash
-mvn -Prelease deploy
-```
+Changes to conversion rules should include authoritative references and representative Gregorian/Bengali
+date pairs so the behavior can be reviewed and tested.
 
-- final publication is completed in the Sonatype Central Portal UI (manual publish flow).
+## Support
+
+Use [GitHub Issues](https://github.com/tapadyutichatterjee/bengali-calendar/issues) for bug reports,
+feature requests, and documentation problems. Include the library version, Java version, calendar system,
+sample input, expected result, and actual result whenever possible.
+
+## License
+
+Licensed under the [Apache License 2.0](LICENSE).
